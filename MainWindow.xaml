@@ -1,0 +1,157 @@
+﻿<Window x:Class="TodoApp.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:TodoApp"
+        Title="Task Manager Pro" Height="850" Width="1250" Background="{DynamicResource WinBg}">
+
+    <Window.Resources>
+        <local:StatusColorConverter x:Key="StatusColorConverter"/>
+        <local:PriorityColorConverter x:Key="PriorityColorConverter"/>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+        <local:OverdueColorConverter x:Key="OverdueColorConverter"/>
+    </Window.Resources>
+
+    <DockPanel>
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="_File">
+                <MenuItem Header="Exit" Click="Exit_Click"/>
+            </MenuItem>
+            <MenuItem Header="_View">
+                <MenuItem Header="Light Theme" Click="SetLightTheme"/>
+                <MenuItem Header="Dark Theme" Click="SetDarkTheme"/>
+            </MenuItem>
+        </Menu>
+
+        <StatusBar DockPanel.Dock="Bottom" Background="{DynamicResource SideBg}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0">
+            <StatusBarItem>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Total: " Foreground="{DynamicResource LabelTxt}"/>
+                    <TextBlock x:Name="lblTotalCount" Text="0" Foreground="{DynamicResource Txt}" FontWeight="Bold"/>
+                </StackPanel>
+            </StatusBarItem>
+            <Separator/>
+            <StatusBarItem>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Done: " Foreground="{DynamicResource LabelTxt}"/>
+                    <TextBlock x:Name="lblDoneCount" Text="0" Foreground="Green" FontWeight="Bold"/>
+                </StackPanel>
+            </StatusBarItem>
+        </StatusBar>
+
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="10" Background="{DynamicResource SideBg}">
+            <Label Content="Search:" Foreground="{DynamicResource Txt}" VerticalAlignment="Center"/>
+            <TextBox x:Name="txtSearch" Width="200" TextChanged="TxtSearch_TextChanged" Margin="5" VerticalAlignment="Center"/>
+            <Button Content="Sort by Urgency" Click="SortByDate_Click" Margin="5" Padding="10,2" Background="#0078D7" Foreground="White"/>
+            <Button Content="Cleanup 30-Day Old" Click="CleanOldTasks_Click" Background="Orange" Margin="10,0" Padding="5,2"/>
+            <Button Content="Export CSV" Click="ExportCSV_Click" Padding="5,2"/>
+        </StackPanel>
+
+        <ScrollViewer DockPanel.Dock="Left" Width="300" Background="{DynamicResource SideBg}" Padding="15">
+            <StackPanel>
+                <Label Content="Task Name" Foreground="{DynamicResource LabelTxt}" FontSize="11"/>
+                <TextBox x:Name="txtName" Background="{DynamicResource FieldBg}" Foreground="{DynamicResource Txt}"/>
+                <Label Content="Category" Foreground="{DynamicResource LabelTxt}" FontSize="11"/>
+                <ComboBox x:Name="cmbCategory" SelectionChanged="CmbCategory_SelectionChanged">
+                    <ComboBoxItem Content="Jira"/>
+                    <ComboBoxItem Content="ServiceNow"/>
+                    <ComboBoxItem Content="Miscellaneous"/>
+                </ComboBox>
+                <Label x:Name="lblTicket" Content="Ticket #" Visibility="Collapsed" Foreground="{DynamicResource LabelTxt}" FontSize="11"/>
+                <TextBox x:Name="txtTicket" Visibility="Collapsed" Background="{DynamicResource FieldBg}" Foreground="{DynamicResource Txt}"/>
+                <Label Content="Priority" Foreground="{DynamicResource LabelTxt}" FontSize="11"/>
+                <ComboBox x:Name="cmbPriority">
+                    <ComboBoxItem Content="Low"/>
+                    <ComboBoxItem Content="Med"/>
+                    <ComboBoxItem Content="High"/>
+                </ComboBox>
+                <Label Content="Description" Foreground="{DynamicResource LabelTxt}" FontSize="11"/>
+                <TextBox x:Name="txtDesc" Height="50" TextWrapping="Wrap" Background="{DynamicResource FieldBg}" Foreground="{DynamicResource Txt}"/>
+                <Label Content="Notes" Foreground="{DynamicResource LabelTxt}" FontSize="11"/>
+                <TextBox x:Name="txtNotes" Height="50" TextWrapping="Wrap" Background="{DynamicResource FieldBg}" Foreground="{DynamicResource Txt}"/>
+                <Label Content="Start Date" Foreground="{DynamicResource LabelTxt}" FontSize="11"/>
+                <DatePicker x:Name="dpStart" Margin="0,0,0,10"/>
+                <Label Content="End Date" Foreground="{DynamicResource LabelTxt}" FontSize="11"/>
+                <DatePicker x:Name="dpEnd"/>
+
+                <Label Content="Progress" Foreground="{DynamicResource LabelTxt}" FontSize="11"/>
+                <DockPanel Margin="0,5">
+                    <TextBlock Text="{Binding ElementName=sldPercent, Path=Value, StringFormat={}{0}%}" DockPanel.Dock="Right" Width="40" TextAlignment="Right" Foreground="{DynamicResource Txt}" FontWeight="Bold"/>
+                    <Slider x:Name="sldPercent" Minimum="0" Maximum="100" TickFrequency="10" IsSnapToTickEnabled="True"/>
+                </DockPanel>
+
+                <CheckBox x:Name="chkReminder" Content="Reminder?" Foreground="{DynamicResource Txt}" Margin="0,5"/>
+                <DatePicker x:Name="dpReminder" IsEnabled="{Binding ElementName=chkReminder, Path=IsChecked}"/>
+                <CheckBox x:Name="chkImportant" Content="⭐ Important" Foreground="{DynamicResource Txt}" Margin="0,5"/>
+
+                <UniformGrid Columns="2" Margin="0,10">
+                    <Button Content="Add New" Click="AddNewTask_Click" Background="LightGreen" Margin="2"/>
+                    <Button Content="Update" Click="UpdateTask_Click" Background="LightSkyBlue" Margin="2"/>
+                </UniformGrid>
+                <Button Content="Delete Selected" Click="DeleteTask_Click" Background="LightPink" Margin="0,5"/>
+                <Button Content="Clear Form" Click="ClearInputs_Click" Margin="0,5"/>
+            </StackPanel>
+        </ScrollViewer>
+
+        <DataGrid x:Name="dgTasks" AutoGenerateColumns="False" IsReadOnly="True" 
+                  SelectionChanged="DgTasks_SelectionChanged" MouseDoubleClick="dgTasks_MouseDoubleClick">
+            <DataGrid.RowStyle>
+                <Style TargetType="DataGridRow">
+                    <Setter Property="Background" Value="{Binding Priority, Converter={StaticResource PriorityColorConverter}}"/>
+
+                    <Style.Triggers>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter Property="Background" Value="#0078D7" />
+                            <Setter Property="Foreground" Value="White" />
+                        </Trigger>
+
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding PercentComplete}" Value="100"/>
+                                <Condition Binding="{Binding EndDate, Converter={StaticResource OverdueColorConverter}}" Value="{x:Null}"/>
+                            </MultiDataTrigger.Conditions>
+
+                            <Setter Property="Background" Value="#FFDADA"/>
+                            <Setter Property="Foreground" Value="#C41E3A"/>
+                        </MultiDataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </DataGrid.RowStyle>
+            <DataGrid.Columns>
+                <DataGridTemplateColumn Header="Task" Width="180">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="⭐ " Foreground="Gold" Visibility="{Binding IsImportant, Converter={StaticResource BoolToVis}}"/>
+                                <TextBlock Text="{Binding TaskName}"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn Header="Priority" Binding="{Binding Priority}" Width="70"/>
+                <DataGridTextColumn Header="Cat" Binding="{Binding Category}" Width="80"/>
+                <DataGridTemplateColumn Header="Ticket" Width="80">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock><Hyperlink Click="Hyperlink_Click"><Run Text="{Binding TicketNumber}"/></Hyperlink></TextBlock>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="Status" Width="80">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Border Background="{Binding PercentComplete, Converter={StaticResource StatusColorConverter}}" CornerRadius="4">
+                                <TextBlock Text="{Binding StatusLabel}" Foreground="White" HorizontalAlignment="Center"/>
+                            </Border>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn Header="%" Binding="{Binding PercentComplete, StringFormat={}{0}%}" Width="45"/>
+                <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="150"/>
+                <DataGridTextColumn Header="Start Date" Binding="{Binding StartDate}" Width="100"/>
+                <DataGridTextColumn Header="End Date" Binding="{Binding EndDate}" Width="100"/>
+                <DataGridTextColumn Header="Last Updated" Binding="{Binding LastModifiedDisplay}" FontSize="10" Width="120"/>
+                <DataGridTextColumn Header="Notes" Binding="{Binding Notes}" Width="*"/>
+            </DataGrid.Columns>
+        </DataGrid>
+    </DockPanel>
+</Window>
