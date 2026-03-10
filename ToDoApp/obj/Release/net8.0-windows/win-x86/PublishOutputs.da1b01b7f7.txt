@@ -1,0 +1,8 @@
+C:\Users\dfran\OneDrive\Documents\ProjectTestApp\ToDoApp.pdb
+C:\Users\dfran\OneDrive\Documents\ProjectTestApp\D3DCompiler_47_cor3.dll
+C:\Users\dfran\OneDrive\Documents\ProjectTestApp\PenImc_cor3.dll
+C:\Users\dfran\OneDrive\Documents\ProjectTestApp\PresentationNative_cor3.dll
+C:\Users\dfran\OneDrive\Documents\ProjectTestApp\vcruntime140_cor3.dll
+C:\Users\dfran\OneDrive\Documents\ProjectTestApp\wpfgfx_cor3.dll
+C:\Users\dfran\OneDrive\Documents\ProjectTestApp\SQLite.Interop.dll
+C:\Users\dfran\OneDrive\Documents\ProjectTestApp\ToDoApp.exe
