@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "ni85V4X+1kI=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\dfran\\source\\repos\\ToDoApp\\ToDoApp\\ToDoApp.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\dfran\\.nuget\\packages\\stub.system.data.sqlite.core.netstandard\\1.0.119\\stub.system.data.sqlite.core.netstandard.1.0.119.nupkg.sha512",
+    "C:\\Users\\dfran\\.nuget\\packages\\system.data.sqlite.core\\1.0.119\\system.data.sqlite.core.1.0.119.nupkg.sha512"
+  ],
+  "logs": []
+}
